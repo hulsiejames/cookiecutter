@@ -1,0 +1,55 @@
+name: Validate generated packages
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        project:
+          - {name: "Package Name", folder: "package-name"}
+          - {name: "Example Project", folder: "example-project"}
+    env:
+      GIT_AUTHOR_NAME: Template checks
+      GIT_AUTHOR_EMAIL: template-checks@example.com
+      GIT_COMMITTER_NAME: Template checks
+      GIT_COMMITTER_EMAIL: template-checks@example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install template tooling
+        run: python -m pip install "cookiecutter>=2.4" build
+      - name: Render and initialise a package
+        env:
+          PROJECT_NAME: ${{ matrix.project.name }}
+        run: python -c "import os; from cookiecutter.main import cookiecutter; cookiecutter('.', no_input=True, output_dir='generated', extra_context={'project_name': os.environ['PROJECT_NAME'], 'init_git': True})"
+      - name: Install generated package
+        run: python -m pip install -e ".[dev,docs]"
+        working-directory: generated/${{ matrix.project.folder }}
+      - name: Verify development tools
+        run: |
+          ruff format --check --diff .
+          ruff check --no-fix .
+          pylint src
+          mypy src
+        working-directory: generated/${{ matrix.project.folder }}
+      - name: Verify package tests
+        run: pytest
+        working-directory: generated/${{ matrix.project.folder }}
+      - name: Verify distributions
+        run: python -m build
+        working-directory: generated/${{ matrix.project.folder }}
+      - name: Verify documentation
+        run: sphinx-build -W --keep-going -b html docs/source docs/build/html
+        working-directory: generated/${{ matrix.project.folder }}

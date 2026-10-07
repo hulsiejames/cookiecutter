@@ -1,0 +1,43 @@
+{
+    "project_name": "Package Name",
+    "__readable_name": "{{ cookiecutter.project_name }}",
+    "package_name": "{{ cookiecutter.project_name|pkg_name }}",
+    "project_slug": "{{ cookiecutter.project_name|repo_name }}",
+    "author": "James Hulse",
+    "github_org": "hulsiejames",
+    "github_url": "https://github.com/{{ cookiecutter.github_org }}/{{ cookiecutter.project_slug }}",
+    "description": "Package description",
+    "init_git": false,
+    "push_repository": false,
+    "__year": "{% now 'local', '%Y' %}",
+    "__docs_name": "{{ cookiecutter.project_slug.replace('.', '') }}",
+    "__readthedocs_url": "https://{{ cookiecutter.__docs_name }}.readthedocs.io/en",
+    "__pkg_folder": "{{ cookiecutter.package_name.replace('.', '/') }}",
+    "_template_details": "Populated from README.md before prompting",
+    "_extensions": [
+        "local_extensions.pkg_name",
+        "local_extensions.repo_name",
+        "local_extensions.docstring"
+    ],
+    "_copy_without_render": [
+        ".github/workflows/linting.yml",
+        ".github/workflows/typing.yml",
+        ".github/workflows/tests.yml",
+        "docs/source/_templates/autosummary"
+    ],
+    "_jinja2_env_vars": {
+        "trim_blocks": true,
+        "lstrip_blocks": true
+    },
+    "__prompts__": {
+        "project_name": "Human-Readable Project Name",
+        "package_name": "Full Package Name",
+        "project_slug": "Full Repository Name",
+        "author": "Author",
+        "github_org": "GitHub User or Organisation Account",
+        "github_url": "GitHub Source Code URL",
+        "description": "Brief package description",
+        "init_git": "Initialise local git repository?",
+        "push_repository": "Push repository to GitHub? An empty GitHub repository must exist."
+    }
+}
